@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+model Message {
+  id        String      @id @default(uuid())
+  content   String?     @db.Text
+  type      MessageType @default(TEXT)
+  fileUrl   String?
+  fileName  String?
+  fileSize  Int?
+  senderId  String      // identifier for the sender
+  senderName String     // display name
+  status    String      @default("sent") // sent, delivered, read
+  createdAt DateTime    @default(now())
+
+  @@index([createdAt])
+}
+
+model RateLimit {
+  id        String   @id @default(uuid())
+  ip        String
+  key       String   // e.g., 'captcha'
+  count     Int      @default(0)
+  lastAttempt DateTime @default(now())
+
+  @@unique([ip, key])
+}
